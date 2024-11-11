@@ -9,7 +9,7 @@ import {
   IDateGenerationStrategy,
   IDateGroupingStrategy,
   MonthInfo,
-} from "./types";
+} from "./dist";
 
 export class StandardDateGenerationStrategy<T extends { date: Date }>
   implements IDateGenerationStrategy<T>
