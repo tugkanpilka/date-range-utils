@@ -4,6 +4,7 @@ import {
   addDays,
   getMonth,
 } from "date-fns";
+import { getISOWeek } from "date-fns";
 
 export interface IDateGenerationStrategy<T> {
   generate(startDate: Date, endDate: Date): T[];
@@ -13,8 +14,8 @@ export interface IDateGroupingStrategy<T, S> {
   group(dates: T[]): S[];
 }
 
-export interface IDateDecorator<T> {
-  decorate(dates: T[]): T[];
+export interface IDateDecorator<T, S> {
+  decorate(dates: T[]): S[];
 }
 
 export interface DateInfo {
@@ -70,6 +71,44 @@ export class MonthGroupingStrategy<T extends { date: Date }>
   }
 }
 
+type WeekNumberDecoration =
+  | DateInfo
+  | { isWeekNumberDecoration: true; weekNumber: number };
+
+export class WeekNumberDecorator {
+  /**
+   * Decorates the date array by adding a `weekNumber` marker
+   * at the end of the last date for each distinct week in the array.
+   * @param dates Array of objects with a `date` property.
+   * @returns Array with week markers inserted at the end of each ISO week.
+   */
+  decorate(dates: DateInfo[]): WeekNumberDecoration[] {
+    const result: WeekNumberDecoration[] = [];
+    let currentWeek = getISOWeek(dates[0].date); // Initialize with the first week's number
+
+    dates.forEach((dateInfo, index) => {
+      const dateWeek = getISOWeek(dateInfo.date);
+      const isNewWeek = currentWeek !== dateWeek;
+
+      // Push the current date into the result (always keep original dates)
+      result.push(dateInfo);
+
+      // End of the current week OR last date in the array => Add week marker
+      if (dateWeek !== currentWeek || isNewWeek || index === dates.length - 1) {
+        result.push({
+          isWeekNumberDecoration: true,
+          weekNumber: currentWeek, // Add current week's marker
+        });
+
+        // Update to the next week
+        currentWeek = dateWeek;
+      }
+    });
+
+    return result;
+  }
+}
+
 export class DateRange<T extends { date: Date }, S = MonthInfo<T>> {
   private dates: (T | S)[] = [];
 
@@ -96,8 +135,8 @@ export class DateRange<T extends { date: Date }, S = MonthInfo<T>> {
     return this;
   }
 
-  apply(decorator: IDateDecorator<T>): this {
-    this.dates = decorator.decorate(this.dates as T[]);
+  apply(decorator: IDateDecorator<T, S>): this {
+    this.dates = decorator.decorate(this.dates as T[]) as (T | S)[];
     return this;
   }
 
