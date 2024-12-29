@@ -71,7 +71,7 @@ export class MonthGroupingStrategy<T extends { date: Date }>
   }
 }
 
-type WeekNumberDecoration =
+export type WeekNumberDecoration =
   | DateInfo
   | { isWeekNumberDecoration: true; weekNumber: number };
 
@@ -83,25 +83,32 @@ export class WeekNumberDecorator {
    * @returns Array with week markers inserted at the end of each ISO week.
    */
   decorate(dates: DateInfo[]): WeekNumberDecoration[] {
+    if (dates.length === 0) return []; // Handle empty input case
+
     const result: WeekNumberDecoration[] = [];
     let currentWeek = getISOWeek(dates[0].date); // Initialize with the first week's number
 
     dates.forEach((dateInfo, index) => {
       const dateWeek = getISOWeek(dateInfo.date);
-      const isNewWeek = currentWeek !== dateWeek;
 
-      // Push the current date into the result (always keep original dates)
-      result.push(dateInfo);
-
-      // End of the current week OR last date in the array => Add week marker
-      if (dateWeek !== currentWeek || isNewWeek || index === dates.length - 1) {
+      // Add week marker if transitioning weeks
+      if (dateWeek !== currentWeek) {
         result.push({
           isWeekNumberDecoration: true,
-          weekNumber: currentWeek, // Add current week's marker
+          weekNumber: currentWeek,
         });
+        currentWeek = dateWeek; // Update to the new week
+      }
 
-        // Update to the next week
-        currentWeek = dateWeek;
+      // Push the current date into the result
+      result.push(dateInfo);
+
+      // Ensure the last week's marker is always added (last iteration)
+      if (index === dates.length - 1) {
+        result.push({
+          isWeekNumberDecoration: true,
+          weekNumber: dateWeek,
+        });
       }
     });
 
