@@ -52,9 +52,9 @@ var WeekNumberDecorator = /** @class */ (function () {
      */
     WeekNumberDecorator.prototype.decorate = function (dates) {
         if (dates.length === 0)
-            return []; // Handle empty input case
+            return [];
         var result = [];
-        var currentWeek = (0, date_fns_2.getISOWeek)(dates[0].date); // Initialize with the first week's number
+        var currentWeek = (0, date_fns_2.getISOWeek)(dates[0].date);
         dates.forEach(function (dateInfo, index) {
             var dateWeek = (0, date_fns_2.getISOWeek)(dateInfo.date);
             // Add week marker if transitioning weeks

@@ -142,9 +142,16 @@ export class DateRange<T extends { date: Date }, S = MonthInfo<T>> {
     return this;
   }
 
-  apply(decorator: IDateDecorator<T, S>): this {
-    this.dates = decorator.decorate(this.dates as T[]) as (T | S)[];
-    return this;
+  apply<U extends { date: Date }>(
+    decorator: IDateDecorator<T, U>,
+  ): DateRange<U, S> {
+    const decoratedDates: U[] = decorator.decorate(this.dates as T[]);
+
+    // Explicitly change the type of 'this' to ensure assignment works:
+    const updatedDateRange = this as unknown as DateRange<U, S>;
+    updatedDateRange.dates = decoratedDates as unknown as (U | S)[];
+
+    return updatedDateRange;
   }
 
   group(strategy: IDateGroupingStrategy<T, S>): this {
