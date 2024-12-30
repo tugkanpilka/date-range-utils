@@ -98,8 +98,11 @@ var DateRange = /** @class */ (function () {
         return this;
     };
     DateRange.prototype.apply = function (decorator) {
-        this.dates = decorator.decorate(this.dates);
-        return this;
+        var decoratedDates = decorator.decorate(this.dates);
+        // Explicitly change the type of 'this' to ensure assignment works:
+        var updatedDateRange = this;
+        updatedDateRange.dates = decoratedDates;
+        return updatedDateRange;
     };
     DateRange.prototype.group = function (strategy) {
         this.dates = strategy.group(this.dates);
