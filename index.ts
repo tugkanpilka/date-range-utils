@@ -71,8 +71,8 @@ export class MonthGroupingStrategy<T extends { date: Date }>
   }
 }
 
-export type WeekNumberDecoration =
-  | DateInfo
+export type WeekNumberDecoration<T> =
+  | T
   | { isWeekNumberDecoration: true; weekNumber: number };
 
 export class WeekNumberDecorator {
@@ -82,11 +82,11 @@ export class WeekNumberDecorator {
    * @param dates Array of objects with a `date` property.
    * @returns Array with week markers inserted at the end of each ISO week.
    */
-  decorate(dates: DateInfo[]): WeekNumberDecoration[] {
-    if (dates.length === 0) return []; // Handle empty input case
+  decorate<T>(dates: (T & { date: Date })[]): WeekNumberDecoration<T>[] {
+    if (dates.length === 0) return [];
 
-    const result: WeekNumberDecoration[] = [];
-    let currentWeek = getISOWeek(dates[0].date); // Initialize with the first week's number
+    const result: WeekNumberDecoration<T>[] = [];
+    let currentWeek = getISOWeek(dates[0].date);
 
     dates.forEach((dateInfo, index) => {
       const dateWeek = getISOWeek(dateInfo.date);

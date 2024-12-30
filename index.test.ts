@@ -87,50 +87,97 @@ describe("MonthGroupingStrategy Tests", () => {
   });
 });
 
-describe("WeekNumberDecorator Tests", () => {
-  let decorator: WeekNumberDecorator;
+describe("WeekNumberDecorator", () => {
+  const decorator = new WeekNumberDecorator();
 
-  beforeEach(() => {
-    decorator = new WeekNumberDecorator();
+  interface TestDateInfo {
+    date: Date;
+    data?: string; // Example additional property
+  }
+
+  it("should handle an empty array", () => {
+    expect(decorator.decorate<TestDateInfo>([])).toEqual([]);
   });
 
-  it("should add week markers for each ISO week", () => {
-    const dates: DateInfo[] = [
-      { date: new Date(2024, 0, 1), weekNumber: 1 }, // Week 1
-      { date: new Date(2024, 0, 7), weekNumber: 1 }, // Week 1
-      { date: new Date(2024, 0, 8), weekNumber: 2 }, // Week 2
+  it("should handle a single date", () => {
+    const input: TestDateInfo[] = [{ date: new Date("2024-01-01") }];
+
+    const expected: WeekNumberDecoration<TestDateInfo>[] = [
+      { date: new Date("2024-01-01") },
+      {
+        isWeekNumberDecoration: true,
+        weekNumber: getISOWeek(new Date("2024-01-01")),
+      },
     ];
 
-    const result = decorator.decorate(dates);
-
-    expect(result).toHaveLength(5); // 3 dates + 2 markers
-    expect(result[2]).toMatchObject({
-      weekNumber: 1,
-      isWeekNumberDecoration: true,
-    });
-    expect(result[4]).toMatchObject({
-      weekNumber: 2,
-      isWeekNumberDecoration: true,
-    });
+    expect(decorator.decorate(input)).toEqual(expected);
   });
 
-  it("should handle sparse weekly entries", () => {
-    const dates: DateInfo[] = [
-      { date: new Date(2023, 11, 25), weekNumber: 52 }, // Week 52
-      { date: new Date(2024, 0, 1), weekNumber: 1 }, // Week 1 (new year)
+  it("should add week markers for multiple weeks", () => {
+    const input: TestDateInfo[] = [
+      { date: new Date("2024-01-01") }, // ISO week 1
+      { date: new Date("2024-01-07") }, // Still ISO week 1
+      { date: new Date("2024-01-08") }, // ISO week 2
+      { date: new Date("2024-01-13") }, // Still ISO week 2
+      { date: new Date("2024-01-15") }, // ISO week 3
     ];
 
-    const result = decorator.decorate(dates);
+    const expected: WeekNumberDecoration<TestDateInfo>[] = [
+      { date: new Date("2024-01-01") },
+      { date: new Date("2024-01-07") },
+      { isWeekNumberDecoration: true, weekNumber: 1 },
+      { date: new Date("2024-01-08") },
+      { date: new Date("2024-01-13") },
+      { isWeekNumberDecoration: true, weekNumber: 2 },
+      { date: new Date("2024-01-15") },
+      { isWeekNumberDecoration: true, weekNumber: 3 },
+    ];
 
-    expect(result).toHaveLength(4); // 2 dates + 2 markers
-    expect(result[1]).toMatchObject({
-      weekNumber: 52,
-      isWeekNumberDecoration: true,
-    });
-    expect(result[3]).toMatchObject({
-      weekNumber: 1,
-      isWeekNumberDecoration: true,
-    });
+    expect(decorator.decorate(input)).toEqual(expected);
+  });
+
+  it("should handle dates in a single week without inserting extra week markers", () => {
+    const input: TestDateInfo[] = [
+      { date: new Date("2024-01-01") },
+      { date: new Date("2024-01-03") },
+      { date: new Date("2024-01-05") },
+    ];
+
+    const expected: WeekNumberDecoration<TestDateInfo>[] = [
+      { date: new Date("2024-01-01") },
+      { date: new Date("2024-01-03") },
+      { date: new Date("2024-01-05") },
+      {
+        isWeekNumberDecoration: true,
+        weekNumber: getISOWeek(new Date("2024-01-01")),
+      },
+    ];
+
+    expect(decorator.decorate(input)).toEqual(expected);
+  });
+
+  it("should correctly handle edge cases at the end of the year", () => {
+    const input: TestDateInfo[] = [
+      { date: new Date("2023-12-31") }, // ISO week 52 of 2023
+      { date: new Date("2024-01-01") }, // ISO week 1 of 2024
+      { date: new Date("2024-01-02") }, // Still ISO week 1
+    ];
+
+    const expected: WeekNumberDecoration<TestDateInfo>[] = [
+      { date: new Date("2023-12-31") },
+      {
+        isWeekNumberDecoration: true,
+        weekNumber: getISOWeek(new Date("2023-12-31")),
+      },
+      { date: new Date("2024-01-01") },
+      { date: new Date("2024-01-02") },
+      {
+        isWeekNumberDecoration: true,
+        weekNumber: getISOWeek(new Date("2024-01-01")),
+      },
+    ];
+
+    expect(decorator.decorate(input)).toEqual(expected);
   });
 });
 
@@ -162,11 +209,11 @@ describe("DateRange Tests", () => {
       // @ts-ignore
       .apply(new WeekNumberDecorator());
 
-    const decoratedDates = range.getDates() as WeekNumberDecoration[];
+    const decoratedDates = range.getDates();
 
     expect(decoratedDates.some((d) => "isWeekNumberDecoration" in d)).toBe(
       true,
-    ); // Check for week markers
+    );
   });
 
   it("should group dates by month", () => {
