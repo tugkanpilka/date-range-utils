@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DateRange = exports.MonthGroupingStrategy = exports.StandardDateGenerationStrategy = void 0;
+exports.DateRange = exports.WeekNumberDecorator = exports.MonthGroupingStrategy = exports.StandardDateGenerationStrategy = void 0;
 var date_fns_1 = require("date-fns");
+var date_fns_2 = require("date-fns");
 var StandardDateGenerationStrategy = /** @class */ (function () {
     function StandardDateGenerationStrategy(dateFactory) {
         this.dateFactory = dateFactory;
@@ -40,6 +41,45 @@ var MonthGroupingStrategy = /** @class */ (function () {
     return MonthGroupingStrategy;
 }());
 exports.MonthGroupingStrategy = MonthGroupingStrategy;
+var WeekNumberDecorator = /** @class */ (function () {
+    function WeekNumberDecorator() {
+    }
+    /**
+     * Decorates the date array by adding a `weekNumber` marker
+     * at the end of the last date for each distinct week in the array.
+     * @param dates Array of objects with a `date` property.
+     * @returns Array with week markers inserted at the end of each ISO week.
+     */
+    WeekNumberDecorator.prototype.decorate = function (dates) {
+        if (dates.length === 0)
+            return []; // Handle empty input case
+        var result = [];
+        var currentWeek = (0, date_fns_2.getISOWeek)(dates[0].date); // Initialize with the first week's number
+        dates.forEach(function (dateInfo, index) {
+            var dateWeek = (0, date_fns_2.getISOWeek)(dateInfo.date);
+            // Add week marker if transitioning weeks
+            if (dateWeek !== currentWeek) {
+                result.push({
+                    isWeekNumberDecoration: true,
+                    weekNumber: currentWeek,
+                });
+                currentWeek = dateWeek; // Update to the new week
+            }
+            // Push the current date into the result
+            result.push(dateInfo);
+            // Ensure the last week's marker is always added (last iteration)
+            if (index === dates.length - 1) {
+                result.push({
+                    isWeekNumberDecoration: true,
+                    weekNumber: dateWeek,
+                });
+            }
+        });
+        return result;
+    };
+    return WeekNumberDecorator;
+}());
+exports.WeekNumberDecorator = WeekNumberDecorator;
 var DateRange = /** @class */ (function () {
     function DateRange(startDate, endDate) {
         this.startDate = startDate;
