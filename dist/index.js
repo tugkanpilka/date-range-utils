@@ -62,6 +62,7 @@ var WeekNumberDecorator = /** @class */ (function () {
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: currentWeek,
+                    date: dateInfo.date,
                 });
                 currentWeek = dateWeek; // Update to the new week
             }
@@ -72,6 +73,7 @@ var WeekNumberDecorator = /** @class */ (function () {
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: dateWeek,
+                    date: dateInfo.date,
                 });
             }
         });

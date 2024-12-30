@@ -73,7 +73,7 @@ export class MonthGroupingStrategy<T extends { date: Date }>
 
 export type WeekNumberDecoration<T> =
   | T
-  | { isWeekNumberDecoration: true; weekNumber: number };
+  | { date: Date; isWeekNumberDecoration: true; weekNumber: number };
 
 export class WeekNumberDecorator {
   /**
@@ -96,6 +96,7 @@ export class WeekNumberDecorator {
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: currentWeek,
+          date: dateInfo.date,
         });
         currentWeek = dateWeek; // Update to the new week
       }
@@ -108,6 +109,7 @@ export class WeekNumberDecorator {
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: dateWeek,
+          date: dateInfo.date,
         });
       }
     });
