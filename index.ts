@@ -89,7 +89,6 @@ export class WeekNumberDecorator {
     const result: WeekNumberDecoration<T>[] = [];
     let weekDates: Date[] = [];
     let currentWeek = getISOWeek(dates[0].date);
-    let weekStartDate = dates[0].date;
 
     dates.forEach((dateInfo, index) => {
       const dateWeek = getISOWeek(dateInfo.date);
@@ -97,11 +96,6 @@ export class WeekNumberDecorator {
       // If we're still in the same week, collect the date
       if (dateWeek === currentWeek) {
         weekDates.push(dateInfo.date);
-      }
-
-      // If this is the first date of a new week, update weekStartDate
-      if (index === 0 || getISOWeek(dates[index - 1].date) !== dateWeek) {
-        weekStartDate = dateInfo.date;
       }
 
       // Push the current date into the result
@@ -131,18 +125,22 @@ export class WeekNumberDecorator {
           }
         });
 
-        // Add week marker using the first date of the week
+        // Find a date from the majority month to use for the marker
+        const markerDate = weekDates.find(
+          (date) => date.getMonth() === majorityMonth
+        )!;
+
+        // Add week marker using a date from the majority month
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: currentWeek,
-          date: weekStartDate,
+          date: markerDate,
         });
 
         // Reset for next week
         weekDates = [];
         if (!isLastDate) {
           currentWeek = getISOWeek(dates[index + 1].date);
-          weekStartDate = dates[index + 1].date;
           weekDates.push(dates[index + 1].date);
         }
       }

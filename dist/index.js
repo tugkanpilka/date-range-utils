@@ -57,16 +57,11 @@ var WeekNumberDecorator = /** @class */ (function () {
         var result = [];
         var weekDates = [];
         var currentWeek = (0, date_fns_2.getISOWeek)(dates[0].date);
-        var weekStartDate = dates[0].date;
         dates.forEach(function (dateInfo, index) {
             var dateWeek = (0, date_fns_2.getISOWeek)(dateInfo.date);
             // If we're still in the same week, collect the date
             if (dateWeek === currentWeek) {
                 weekDates.push(dateInfo.date);
-            }
-            // If this is the first date of a new week, update weekStartDate
-            if (index === 0 || (0, date_fns_2.getISOWeek)(dates[index - 1].date) !== dateWeek) {
-                weekStartDate = dateInfo.date;
             }
             // Push the current date into the result
             result.push(dateInfo);
@@ -90,17 +85,18 @@ var WeekNumberDecorator = /** @class */ (function () {
                         majorityMonth_1 = month;
                     }
                 });
-                // Add week marker using the first date of the week
+                // Find a date from the majority month to use for the marker
+                var markerDate = weekDates.find(function (date) { return date.getMonth() === majorityMonth_1; });
+                // Add week marker using a date from the majority month
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: currentWeek,
-                    date: weekStartDate,
+                    date: markerDate,
                 });
                 // Reset for next week
                 weekDates = [];
                 if (!isLastDate) {
                     currentWeek = (0, date_fns_2.getISOWeek)(dates[index + 1].date);
-                    weekStartDate = dates[index + 1].date;
                     weekDates.push(dates[index + 1].date);
                 }
             }

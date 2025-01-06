@@ -232,7 +232,7 @@ describe("WeekNumberDecorator", () => {
 
   it("should show week number in the month with majority of days", () => {
     const input: TestDateInfo[] = [
-      // Week 31 (5 days in July, 2 days in August)
+      // Week 31 (3 days in July, 4 days in August)
       { date: new Date("2024-07-29") }, // Monday (July)
       { date: new Date("2024-07-30") }, // Tuesday (July)
       { date: new Date("2024-07-31") }, // Wednesday (July)
@@ -258,9 +258,9 @@ describe("WeekNumberDecorator", () => {
 
     expect(weekMarkers).toHaveLength(2);
 
-    // Week 31 should be in July (month 6) because it has majority of days
+    // Week 31 should be in August (month 7) because it has majority of days (4 vs 3)
     expect(weekMarkers[0].weekNumber).toBe(31);
-    expect(weekMarkers[0].date.getMonth()).toBe(6); // July
+    expect(weekMarkers[0].date.getMonth()).toBe(7); // August
 
     // Week 32 should be in August (month 7)
     expect(weekMarkers[1].weekNumber).toBe(32);
