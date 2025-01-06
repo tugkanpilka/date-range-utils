@@ -229,6 +229,43 @@ describe("WeekNumberDecorator", () => {
     expect(weekMarkers[1].weekNumber).toBe(49);
     expect(weekMarkers[1].date.getMonth()).toBe(11); // December
   });
+
+  it("should show week number in the month with majority of days", () => {
+    const input: TestDateInfo[] = [
+      // Week 31 (5 days in July, 2 days in August)
+      { date: new Date("2024-07-29") }, // Monday (July)
+      { date: new Date("2024-07-30") }, // Tuesday (July)
+      { date: new Date("2024-07-31") }, // Wednesday (July)
+      { date: new Date("2024-08-01") }, // Thursday (August)
+      { date: new Date("2024-08-02") }, // Friday (August)
+      { date: new Date("2024-08-03") }, // Saturday (August)
+      { date: new Date("2024-08-04") }, // Sunday (August)
+      // Week 32 (all days in August)
+      { date: new Date("2024-08-05") }, // Monday (August)
+      { date: new Date("2024-08-06") }, // Tuesday (August)
+    ];
+
+    const result = decorator.decorate(input);
+    const weekMarkers = result.filter(
+      (
+        item
+      ): item is {
+        date: Date;
+        isWeekNumberDecoration: true;
+        weekNumber: number;
+      } => "isWeekNumberDecoration" in item
+    );
+
+    expect(weekMarkers).toHaveLength(2);
+
+    // Week 31 should be in July (month 6) because it has majority of days
+    expect(weekMarkers[0].weekNumber).toBe(31);
+    expect(weekMarkers[0].date.getMonth()).toBe(6); // July
+
+    // Week 32 should be in August (month 7)
+    expect(weekMarkers[1].weekNumber).toBe(32);
+    expect(weekMarkers[1].date.getMonth()).toBe(7); // August
+  });
 });
 
 describe("DateRange Tests", () => {

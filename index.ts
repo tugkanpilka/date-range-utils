@@ -78,8 +78,8 @@ export type WeekNumberDecoration<T> =
 export class WeekNumberDecorator {
   /**
    * Decorates the date array by adding a `weekNumber` marker
-   * at the end of each week. The marker is added after the last day of the week
-   * but represents the week number of that week.
+   * at the end of each week. The marker is added in the month
+   * that contains the majority of the week's days.
    * @param dates Array of objects with a `date` property.
    * @returns Array with week markers inserted at the end of each ISO week.
    */
@@ -87,29 +87,64 @@ export class WeekNumberDecorator {
     if (dates.length === 0) return [];
 
     const result: WeekNumberDecoration<T>[] = [];
+    let weekDates: Date[] = [];
+    let currentWeek = getISOWeek(dates[0].date);
     let weekStartDate = dates[0].date;
 
     dates.forEach((dateInfo, index) => {
-      const currentWeek = getISOWeek(dateInfo.date);
-      const nextDate = dates[index + 1]?.date;
-      const isLastDate = index === dates.length - 1;
-      const isWeekTransition = nextDate && getISOWeek(nextDate) !== currentWeek;
+      const dateWeek = getISOWeek(dateInfo.date);
+
+      // If we're still in the same week, collect the date
+      if (dateWeek === currentWeek) {
+        weekDates.push(dateInfo.date);
+      }
 
       // If this is the first date of a new week, update weekStartDate
-      if (index === 0 || getISOWeek(dates[index - 1].date) !== currentWeek) {
+      if (index === 0 || getISOWeek(dates[index - 1].date) !== dateWeek) {
         weekStartDate = dateInfo.date;
       }
 
       // Push the current date into the result
       result.push(dateInfo);
 
-      // Add week marker if it's the last date of the week
-      if (isWeekTransition || isLastDate) {
+      // If week is changing or it's the last date
+      const isLastDate = index === dates.length - 1;
+      const isWeekChanging =
+        index < dates.length - 1 &&
+        getISOWeek(dates[index + 1].date) !== currentWeek;
+
+      if (isWeekChanging || isLastDate) {
+        // Find the month that has the majority of days
+        const monthCounts = new Map<number, number>();
+        weekDates.forEach((date) => {
+          const month = date.getMonth();
+          monthCounts.set(month, (monthCounts.get(month) || 0) + 1);
+        });
+
+        // Find the month with the most days
+        let majorityMonth = weekDates[0].getMonth();
+        let maxDays = 0;
+        monthCounts.forEach((count, month) => {
+          if (count > maxDays) {
+            maxDays = count;
+            majorityMonth = month;
+          }
+        });
+
+        // Add week marker using the first date of the week
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: currentWeek,
-          date: weekStartDate, // Use the first date of the week
+          date: weekStartDate,
         });
+
+        // Reset for next week
+        weekDates = [];
+        if (!isLastDate) {
+          currentWeek = getISOWeek(dates[index + 1].date);
+          weekStartDate = dates[index + 1].date;
+          weekDates.push(dates[index + 1].date);
+        }
       }
     });
 

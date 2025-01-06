@@ -46,8 +46,8 @@ var WeekNumberDecorator = /** @class */ (function () {
     }
     /**
      * Decorates the date array by adding a `weekNumber` marker
-     * at the end of each week. The marker is added after the last day of the week
-     * but represents the week number of that week.
+     * at the end of each week. The marker is added in the month
+     * that contains the majority of the week's days.
      * @param dates Array of objects with a `date` property.
      * @returns Array with week markers inserted at the end of each ISO week.
      */
@@ -55,26 +55,54 @@ var WeekNumberDecorator = /** @class */ (function () {
         if (dates.length === 0)
             return [];
         var result = [];
+        var weekDates = [];
+        var currentWeek = (0, date_fns_2.getISOWeek)(dates[0].date);
         var weekStartDate = dates[0].date;
         dates.forEach(function (dateInfo, index) {
-            var _a;
-            var currentWeek = (0, date_fns_2.getISOWeek)(dateInfo.date);
-            var nextDate = (_a = dates[index + 1]) === null || _a === void 0 ? void 0 : _a.date;
-            var isLastDate = index === dates.length - 1;
-            var isWeekTransition = nextDate && (0, date_fns_2.getISOWeek)(nextDate) !== currentWeek;
+            var dateWeek = (0, date_fns_2.getISOWeek)(dateInfo.date);
+            // If we're still in the same week, collect the date
+            if (dateWeek === currentWeek) {
+                weekDates.push(dateInfo.date);
+            }
             // If this is the first date of a new week, update weekStartDate
-            if (index === 0 || (0, date_fns_2.getISOWeek)(dates[index - 1].date) !== currentWeek) {
+            if (index === 0 || (0, date_fns_2.getISOWeek)(dates[index - 1].date) !== dateWeek) {
                 weekStartDate = dateInfo.date;
             }
             // Push the current date into the result
             result.push(dateInfo);
-            // Add week marker if it's the last date of the week
-            if (isWeekTransition || isLastDate) {
+            // If week is changing or it's the last date
+            var isLastDate = index === dates.length - 1;
+            var isWeekChanging = index < dates.length - 1 &&
+                (0, date_fns_2.getISOWeek)(dates[index + 1].date) !== currentWeek;
+            if (isWeekChanging || isLastDate) {
+                // Find the month that has the majority of days
+                var monthCounts_1 = new Map();
+                weekDates.forEach(function (date) {
+                    var month = date.getMonth();
+                    monthCounts_1.set(month, (monthCounts_1.get(month) || 0) + 1);
+                });
+                // Find the month with the most days
+                var majorityMonth_1 = weekDates[0].getMonth();
+                var maxDays_1 = 0;
+                monthCounts_1.forEach(function (count, month) {
+                    if (count > maxDays_1) {
+                        maxDays_1 = count;
+                        majorityMonth_1 = month;
+                    }
+                });
+                // Add week marker using the first date of the week
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: currentWeek,
-                    date: weekStartDate, // Use the first date of the week
+                    date: weekStartDate,
                 });
+                // Reset for next week
+                weekDates = [];
+                if (!isLastDate) {
+                    currentWeek = (0, date_fns_2.getISOWeek)(dates[index + 1].date);
+                    weekStartDate = dates[index + 1].date;
+                    weekDates.push(dates[index + 1].date);
+                }
             }
         });
         return result;
