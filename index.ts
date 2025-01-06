@@ -78,7 +78,8 @@ export type WeekNumberDecoration<T> =
 export class WeekNumberDecorator {
   /**
    * Decorates the date array by adding a `weekNumber` marker
-   * at the end of the last date for each distinct week in the array.
+   * at the end of each week. The marker is added after the last day of the week
+   * but represents the week number of that week.
    * @param dates Array of objects with a `date` property.
    * @returns Array with week markers inserted at the end of each ISO week.
    */
@@ -86,30 +87,28 @@ export class WeekNumberDecorator {
     if (dates.length === 0) return [];
 
     const result: WeekNumberDecoration<T>[] = [];
-    let currentWeek = getISOWeek(dates[0].date);
+    let weekStartDate = dates[0].date;
 
     dates.forEach((dateInfo, index) => {
-      const dateWeek = getISOWeek(dateInfo.date);
+      const currentWeek = getISOWeek(dateInfo.date);
+      const nextDate = dates[index + 1]?.date;
+      const isLastDate = index === dates.length - 1;
+      const isWeekTransition = nextDate && getISOWeek(nextDate) !== currentWeek;
 
-      // Add week marker if transitioning weeks
-      if (dateWeek !== currentWeek) {
-        result.push({
-          isWeekNumberDecoration: true,
-          weekNumber: currentWeek,
-          date: dateInfo.date,
-        });
-        currentWeek = dateWeek; // Update to the new week
+      // If this is the first date of a new week, update weekStartDate
+      if (index === 0 || getISOWeek(dates[index - 1].date) !== currentWeek) {
+        weekStartDate = dateInfo.date;
       }
 
       // Push the current date into the result
       result.push(dateInfo);
 
-      // Ensure the last week's marker is always added (last iteration)
-      if (index === dates.length - 1) {
+      // Add week marker if it's the last date of the week
+      if (isWeekTransition || isLastDate) {
         result.push({
           isWeekNumberDecoration: true,
-          weekNumber: dateWeek,
-          date: dateInfo.date,
+          weekNumber: currentWeek,
+          date: weekStartDate, // Use the first date of the week
         });
       }
     });
