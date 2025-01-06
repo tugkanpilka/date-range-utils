@@ -78,8 +78,8 @@ export type WeekNumberDecoration<T> =
 export class WeekNumberDecorator {
   /**
    * Decorates the date array by adding a `weekNumber` marker
-   * at the end of each week. The marker is added in the month
-   * that contains the majority of the week's days.
+   * at the end of each week. The marker is always added in the month
+   * of the last day of the week.
    * @param dates Array of objects with a `date` property.
    * @returns Array with week markers inserted at the end of each ISO week.
    */
@@ -108,33 +108,14 @@ export class WeekNumberDecorator {
         getISOWeek(dates[index + 1].date) !== currentWeek;
 
       if (isWeekChanging || isLastDate) {
-        // Find the month that has the majority of days
-        const monthCounts = new Map<number, number>();
-        weekDates.forEach((date) => {
-          const month = date.getMonth();
-          monthCounts.set(month, (monthCounts.get(month) || 0) + 1);
-        });
+        // Use the last date of the week for the marker
+        const lastDateOfWeek = weekDates[weekDates.length - 1];
 
-        // Find the month with the most days
-        let majorityMonth = weekDates[0].getMonth();
-        let maxDays = 0;
-        monthCounts.forEach((count, month) => {
-          if (count > maxDays) {
-            maxDays = count;
-            majorityMonth = month;
-          }
-        });
-
-        // Find a date from the majority month to use for the marker
-        const markerDate = weekDates.find(
-          (date) => date.getMonth() === majorityMonth
-        )!;
-
-        // Add week marker using a date from the majority month
+        // Add week marker
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: currentWeek,
-          date: markerDate,
+          date: lastDateOfWeek,
         });
 
         // Reset for next week

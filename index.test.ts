@@ -191,17 +191,17 @@ describe("WeekNumberDecorator", () => {
 
   it("should correctly handle week numbers at month transitions", () => {
     const input: TestDateInfo[] = [
-      // November 2023
-      { date: new Date("2023-11-27") }, // Week 48 - Monday
-      { date: new Date("2023-11-28") },
-      { date: new Date("2023-11-29") },
-      { date: new Date("2023-11-30") }, // Thursday
-      // December 2023
-      { date: new Date("2023-12-01") }, // Still Week 48
-      { date: new Date("2023-12-02") },
-      { date: new Date("2023-12-03") }, // Sunday
-      { date: new Date("2023-12-04") }, // Week 49 - Monday
-      { date: new Date("2023-12-05") },
+      // Week 48 (ends in December)
+      { date: new Date("2023-11-27") }, // Monday (November)
+      { date: new Date("2023-11-28") }, // Tuesday (November)
+      { date: new Date("2023-11-29") }, // Wednesday (November)
+      { date: new Date("2023-11-30") }, // Thursday (November)
+      { date: new Date("2023-12-01") }, // Friday (December)
+      { date: new Date("2023-12-02") }, // Saturday (December)
+      { date: new Date("2023-12-03") }, // Sunday (December)
+      // Week 49 (ends in December)
+      { date: new Date("2023-12-04") }, // Monday (December)
+      { date: new Date("2023-12-05") }, // Tuesday (December)
     ];
 
     const result = decorator.decorate(input);
@@ -221,18 +221,18 @@ describe("WeekNumberDecorator", () => {
 
     expect(weekMarkers).toHaveLength(2);
 
-    // Week 48 marker should be in November (month 10)
+    // Week 48 marker should be in December (month 11) because it ends in December
     expect(weekMarkers[0].weekNumber).toBe(48);
-    expect(weekMarkers[0].date.getMonth()).toBe(10); // November
+    expect(weekMarkers[0].date.getMonth()).toBe(11); // December
 
     // Week 49 marker should be in December (month 11)
     expect(weekMarkers[1].weekNumber).toBe(49);
     expect(weekMarkers[1].date.getMonth()).toBe(11); // December
   });
 
-  it("should show week number in the month with majority of days", () => {
+  it("should show week number in the month of the last day", () => {
     const input: TestDateInfo[] = [
-      // Week 31 (3 days in July, 4 days in August)
+      // Week 31 (ends in August)
       { date: new Date("2024-07-29") }, // Monday (July)
       { date: new Date("2024-07-30") }, // Tuesday (July)
       { date: new Date("2024-07-31") }, // Wednesday (July)
@@ -240,7 +240,7 @@ describe("WeekNumberDecorator", () => {
       { date: new Date("2024-08-02") }, // Friday (August)
       { date: new Date("2024-08-03") }, // Saturday (August)
       { date: new Date("2024-08-04") }, // Sunday (August)
-      // Week 32 (all days in August)
+      // Week 32 (ends in August)
       { date: new Date("2024-08-05") }, // Monday (August)
       { date: new Date("2024-08-06") }, // Tuesday (August)
     ];
@@ -258,7 +258,7 @@ describe("WeekNumberDecorator", () => {
 
     expect(weekMarkers).toHaveLength(2);
 
-    // Week 31 should be in August (month 7) because it has majority of days (4 vs 3)
+    // Week 31 should be in August (month 7) because it ends in August
     expect(weekMarkers[0].weekNumber).toBe(31);
     expect(weekMarkers[0].date.getMonth()).toBe(7); // August
 

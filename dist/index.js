@@ -46,8 +46,8 @@ var WeekNumberDecorator = /** @class */ (function () {
     }
     /**
      * Decorates the date array by adding a `weekNumber` marker
-     * at the end of each week. The marker is added in the month
-     * that contains the majority of the week's days.
+     * at the end of each week. The marker is always added in the month
+     * of the last day of the week.
      * @param dates Array of objects with a `date` property.
      * @returns Array with week markers inserted at the end of each ISO week.
      */
@@ -70,28 +70,13 @@ var WeekNumberDecorator = /** @class */ (function () {
             var isWeekChanging = index < dates.length - 1 &&
                 (0, date_fns_2.getISOWeek)(dates[index + 1].date) !== currentWeek;
             if (isWeekChanging || isLastDate) {
-                // Find the month that has the majority of days
-                var monthCounts_1 = new Map();
-                weekDates.forEach(function (date) {
-                    var month = date.getMonth();
-                    monthCounts_1.set(month, (monthCounts_1.get(month) || 0) + 1);
-                });
-                // Find the month with the most days
-                var majorityMonth_1 = weekDates[0].getMonth();
-                var maxDays_1 = 0;
-                monthCounts_1.forEach(function (count, month) {
-                    if (count > maxDays_1) {
-                        maxDays_1 = count;
-                        majorityMonth_1 = month;
-                    }
-                });
-                // Find a date from the majority month to use for the marker
-                var markerDate = weekDates.find(function (date) { return date.getMonth() === majorityMonth_1; });
-                // Add week marker using a date from the majority month
+                // Use the last date of the week for the marker
+                var lastDateOfWeek = weekDates[weekDates.length - 1];
+                // Add week marker
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: currentWeek,
-                    date: markerDate,
+                    date: lastDateOfWeek,
                 });
                 // Reset for next week
                 weekDates = [];

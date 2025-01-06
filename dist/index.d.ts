@@ -37,8 +37,8 @@ export type WeekNumberDecoration<T> = T | {
 export declare class WeekNumberDecorator {
     /**
      * Decorates the date array by adding a `weekNumber` marker
-     * at the end of each week. The marker is added in the month
-     * that contains the majority of the week's days.
+     * at the end of each week. The marker is always added in the month
+     * of the last day of the week.
      * @param dates Array of objects with a `date` property.
      * @returns Array with week markers inserted at the end of each ISO week.
      */
