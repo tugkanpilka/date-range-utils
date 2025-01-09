@@ -33,6 +33,7 @@ export type WeekNumberDecoration<T> = T | {
     date: Date;
     isWeekNumberDecoration: true;
     weekNumber: number;
+    isMultiMonth: boolean;
 };
 export declare class WeekNumberDecorator {
     /**

@@ -71,12 +71,15 @@ var WeekNumberDecorator = /** @class */ (function () {
                 (0, date_fns_2.getISOWeek)(dates[index + 1].date) !== currentWeek;
             if (isWeekChanging || isLastDate) {
                 // Use the last date of the week for the marker
-                var lastDateOfWeek = weekDates[weekDates.length - 1];
+                var lastDateOfWeek_1 = weekDates[weekDates.length - 1];
+                // Check if this week spans across two months
+                var isMultiMonth = weekDates.some(function (date) { return date.getMonth() !== lastDateOfWeek_1.getMonth(); });
                 // Add week marker
                 result.push({
                     isWeekNumberDecoration: true,
                     weekNumber: currentWeek,
-                    date: lastDateOfWeek,
+                    date: lastDateOfWeek_1,
+                    isMultiMonth: isMultiMonth,
                 });
                 // Reset for next week
                 weekDates = [];

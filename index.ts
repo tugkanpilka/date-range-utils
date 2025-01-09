@@ -73,7 +73,12 @@ export class MonthGroupingStrategy<T extends { date: Date }>
 
 export type WeekNumberDecoration<T> =
   | T
-  | { date: Date; isWeekNumberDecoration: true; weekNumber: number };
+  | {
+      date: Date;
+      isWeekNumberDecoration: true;
+      weekNumber: number;
+      isMultiMonth: boolean;
+    };
 
 export class WeekNumberDecorator {
   /**
@@ -111,11 +116,17 @@ export class WeekNumberDecorator {
         // Use the last date of the week for the marker
         const lastDateOfWeek = weekDates[weekDates.length - 1];
 
+        // Check if this week spans across two months
+        const isMultiMonth = weekDates.some(
+          (date) => date.getMonth() !== lastDateOfWeek.getMonth()
+        );
+
         // Add week marker
         result.push({
           isWeekNumberDecoration: true,
           weekNumber: currentWeek,
           date: lastDateOfWeek,
+          isMultiMonth,
         });
 
         // Reset for next week

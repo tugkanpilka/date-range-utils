@@ -96,6 +96,11 @@ describe("WeekNumberDecorator", () => {
     weekNumber?: number;
   }
 
+  type TestWeekNumberDecoration = WeekNumberDecoration<TestDateInfo> & {
+    isWeekNumberDecoration: true;
+    isMultiMonth: boolean;
+  };
+
   it("should handle an empty array", () => {
     expect(decorator.decorate<TestDateInfo>([])).toEqual([]);
   });
@@ -110,6 +115,7 @@ describe("WeekNumberDecorator", () => {
         isWeekNumberDecoration: true,
         weekNumber: getISOWeek(date),
         date,
+        isMultiMonth: false,
       },
     ];
 
@@ -265,6 +271,61 @@ describe("WeekNumberDecorator", () => {
     // Week 32 should be in August (month 7)
     expect(weekMarkers[1].weekNumber).toBe(32);
     expect(weekMarkers[1].date.getMonth()).toBe(7); // August
+  });
+
+  it("should correctly identify multi-month weeks", () => {
+    const input: TestDateInfo[] = [
+      // Week that spans across July and August
+      { date: new Date("2024-07-29") }, // Monday (July)
+      { date: new Date("2024-07-30") }, // Tuesday (July)
+      { date: new Date("2024-07-31") }, // Wednesday (July)
+      { date: new Date("2024-08-01") }, // Thursday (August)
+      { date: new Date("2024-08-02") }, // Friday (August)
+      { date: new Date("2024-08-03") }, // Saturday (August)
+      { date: new Date("2024-08-04") }, // Sunday (August)
+      // Week entirely in August
+      { date: new Date("2024-08-05") }, // Monday (August)
+      { date: new Date("2024-08-06") }, // Tuesday (August)
+    ];
+
+    const result = decorator.decorate(input);
+    const weekMarkers = result.filter(
+      (item): item is TestWeekNumberDecoration =>
+        "isWeekNumberDecoration" in item
+    );
+
+    expect(weekMarkers).toHaveLength(2);
+
+    // First week spans across July and August
+    expect(weekMarkers[0].isMultiMonth).toBe(true);
+    expect(weekMarkers[0].weekNumber).toBe(31);
+
+    // Second week is entirely in August
+    expect(weekMarkers[1].isMultiMonth).toBe(false);
+    expect(weekMarkers[1].weekNumber).toBe(32);
+  });
+
+  it("should handle single month weeks correctly", () => {
+    const input: TestDateInfo[] = [
+      // Week entirely in August
+      { date: new Date("2024-08-05") }, // Monday
+      { date: new Date("2024-08-06") }, // Tuesday
+      { date: new Date("2024-08-07") }, // Wednesday
+      { date: new Date("2024-08-08") }, // Thursday
+      { date: new Date("2024-08-09") }, // Friday
+      { date: new Date("2024-08-10") }, // Saturday
+      { date: new Date("2024-08-11") }, // Sunday
+    ];
+
+    const result = decorator.decorate(input);
+    const weekMarkers = result.filter(
+      (item): item is TestWeekNumberDecoration =>
+        "isWeekNumberDecoration" in item
+    );
+
+    expect(weekMarkers).toHaveLength(1);
+    expect(weekMarkers[0].isMultiMonth).toBe(false);
+    expect(weekMarkers[0].weekNumber).toBe(32);
   });
 });
 
