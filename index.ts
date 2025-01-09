@@ -142,6 +142,12 @@ export class WeekNumberDecorator {
   }
 }
 
+export function isWeekNumberDecoration<T extends object>(
+  date: T | WeekNumberDecoration<T>
+): date is WeekNumberDecoration<T> & { isWeekNumberDecoration: true } {
+  return "isWeekNumberDecoration" in date;
+}
+
 export class DateRange<T extends { date: Date }, S = MonthInfo<T>> {
   private dates: (T | S)[] = [];
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DateRange = exports.WeekNumberDecorator = exports.MonthGroupingStrategy = exports.StandardDateGenerationStrategy = void 0;
+exports.DateRange = exports.isWeekNumberDecoration = exports.WeekNumberDecorator = exports.MonthGroupingStrategy = exports.StandardDateGenerationStrategy = void 0;
 var date_fns_1 = require("date-fns");
 var date_fns_2 = require("date-fns");
 var StandardDateGenerationStrategy = /** @class */ (function () {
@@ -94,6 +94,10 @@ var WeekNumberDecorator = /** @class */ (function () {
     return WeekNumberDecorator;
 }());
 exports.WeekNumberDecorator = WeekNumberDecorator;
+function isWeekNumberDecoration(date) {
+    return "isWeekNumberDecoration" in date;
+}
+exports.isWeekNumberDecoration = isWeekNumberDecoration;
 var DateRange = /** @class */ (function () {
     function DateRange(startDate, endDate) {
         this.startDate = startDate;
