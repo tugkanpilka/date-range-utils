@@ -47,9 +47,10 @@ export declare class WeekNumberDecorator {
         date: Date;
     })[]): WeekNumberDecoration<T>[];
 }
-export declare function isWeekNumberDecoration<T extends object>(date: T | WeekNumberDecoration<T>): date is WeekNumberDecoration<T> & {
+export declare function isWeekNumberDecoration<T extends object>(date: T | WeekNumberDecoration<T>): date is Extract<WeekNumberDecoration<T>, {
     isWeekNumberDecoration: true;
-};
+    isMultiMonth: boolean;
+}>;
 export declare class DateRange<T extends {
     date: Date;
 }, S = MonthInfo<T>> {

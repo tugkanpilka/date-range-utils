@@ -144,7 +144,10 @@ export class WeekNumberDecorator {
 
 export function isWeekNumberDecoration<T extends object>(
   date: T | WeekNumberDecoration<T>
-): date is WeekNumberDecoration<T> & { isWeekNumberDecoration: true } {
+): date is Extract<
+  WeekNumberDecoration<T>,
+  { isWeekNumberDecoration: true; isMultiMonth: boolean }
+> {
   return "isWeekNumberDecoration" in date;
 }
 

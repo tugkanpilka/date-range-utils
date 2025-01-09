@@ -327,6 +327,29 @@ describe("WeekNumberDecorator", () => {
     expect(weekMarkers[0].isMultiMonth).toBe(false);
     expect(weekMarkers[0].weekNumber).toBe(32);
   });
+
+  it("should correctly identify multi-month weeks in week 9", () => {
+    const input: TestDateInfo[] = [
+      // Week 9 (spans February and March)
+      { date: new Date("2024-02-26") }, // Monday (February)
+      { date: new Date("2024-02-27") }, // Tuesday (February)
+      { date: new Date("2024-02-28") }, // Wednesday (February)
+      { date: new Date("2024-02-29") }, // Thursday (February)
+      { date: new Date("2024-03-01") }, // Friday (March)
+      { date: new Date("2024-03-02") }, // Saturday (March)
+      { date: new Date("2024-03-03") }, // Sunday (March)
+    ];
+
+    const result = decorator.decorate(input);
+    const weekMarkers = result.filter(
+      (item): item is TestWeekNumberDecoration =>
+        "isWeekNumberDecoration" in item
+    );
+
+    expect(weekMarkers).toHaveLength(1);
+    expect(weekMarkers[0].isMultiMonth).toBe(true);
+    expect(weekMarkers[0].weekNumber).toBe(9);
+  });
 });
 
 describe("DateRange Tests", () => {
